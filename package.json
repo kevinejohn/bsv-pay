@@ -1,0 +1,17 @@
+{
+  "name": "bsv-pay",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "node ./tests/test.js"
+  },
+  "author": "Kevin Johnson (KevinEJohn)",
+  "license": "MIT",
+  "dependencies": {
+    "minercraft": "0.0.7"
+  },
+  "devDependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
