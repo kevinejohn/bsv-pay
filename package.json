@@ -18,6 +18,8 @@
     "bitcoin",
     "bsv",
     "broadcast",
-    "transactions"
+    "transactions",
+    "miners",
+    "minercraft"
   ]
 }
