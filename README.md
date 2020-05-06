@@ -6,11 +6,11 @@ Broadcast bitcoin transactions to many services
 
 ### Current supported services:
 
-- Mattercloud
-- Matterpool
-- Mempool
-- Taal
-- WhatsOnChain
+- mattercloud
+- matterpool
+- mempool
+- taal
+- whatsonchain
 
 ### Use
 
@@ -18,20 +18,21 @@ Broadcast bitcoin transactions to many services
 
 ```
 const BsvPay = require('bsv-pay')
-const fetchFunc = require('node-fetch')
 
 const pay = new BsvPay({
-    fetchFunc,
+    fetchFunc: require('node-fetch'),  // Node.js
+    // fetchFunc: fetch, // Browser
     mattercloud: {
         api_key: ''
     },
     mempool: {
         token: ''
-    }
+    },
+    // whatsonchain: false // To disable specific service
 })
+const { txid } = await pay.broadcast({ tx, verbose: false })
+const { valid } = await pay.status({ txid, verbose: true })
 pay.feePerKb()
-const { txid } = await pay.broadcast({ tx })
-const status = await pay.status({ txid, verbose: true })
 ```
 
 ### Tests

@@ -1,11 +1,16 @@
 const Plugins = require('./plugins')
+const { DEFAULT_RATE } = require('./config')
 
 class BsvPay {
   constructor (params) {
-    this.plugins = Plugins.map(Plugin => {
+    this.plugins = []
+    Plugins.map(Plugin => {
       const name = Plugin.getName()
-      const { fetchFunc } = params
-      return new Plugin({ ...params[name], name, fetchFunc })
+      if (params[name] !== false) {
+        const { fetchFunc } = params
+        const plugin = new Plugin({ ...params[name], name, fetchFunc })
+        this.plugins.push(plugin)
+      }
     })
   }
 
@@ -54,7 +59,9 @@ class BsvPay {
   }
 
   feePerKb () {
-    return Math.min(...this.plugins.map(plugin => plugin.getRate()))
+    return Math.min(
+      ...this.plugins.map(plugin => plugin.getRate() || DEFAULT_RATE)
+    )
   }
 }
 
