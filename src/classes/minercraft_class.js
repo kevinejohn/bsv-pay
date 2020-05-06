@@ -11,26 +11,21 @@ class MinerClass {
   }
 
   async broadcast ({ txhex, verbose }) {
-    let error, txid, response
+    let response
     try {
       response = await this.miner.tx.push(txhex, { verbose })
       // console.log(response)
-      if (response.txid) {
-        txid = response.txid
-      } else if (response.payload && response.payload.txid) {
-        txid = response.payload.txid
-      } else if (response.payload) {
-        throw new Error(response.payload.resultDescription || `Unknown error`)
-      } else {
-        throw new Error(response.resultDescription || `Unknown error`)
+      let txid = response.payload ? response.payload.txid : response.txid
+      if (!txid || !txid.match(/[0-9A-Fa-f]{64}/)) {
+        const error = response.payload
+          ? response.payload.resultDescription
+          : response.resultDescription
+        throw new Error(error || `Unknown error`)
       }
-    } catch (err) {
-      error = err.message
-    }
-    if (txid) {
+      txid = txid.match(/[0-9A-Fa-f]{64}/)[0]
       return { txid, response }
-    } else {
-      return { error, response }
+    } catch (err) {
+      return { error: err.message, response }
     }
   }
 
