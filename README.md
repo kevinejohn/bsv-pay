@@ -2,7 +2,7 @@
 
 [![NPM Package](https://img.shields.io/npm/v/bsv-pay.svg?style=flat-square)](https://www.npmjs.org/package/bsv-pay)
 
-Broadcast bitcoin transactions to many services
+Broadcast bitcoin transactions to miners
 
 ### Current supported services:
 
