@@ -22,10 +22,10 @@ module.exports = class Whatsonchain extends ApiClass {
             headers: { 'Content-Type': 'application/json' }
           }
         )
-        const response = await res.json()
+        response = await res.json()
         // console.log(`Whatsonchain.com response`, txid)
         if (!response || response.length !== 64) {
-          throw new Error(`Could not broadcast transaction. ${response}.`)
+          throw new Error(`ERROR: ${response}`)
         }
         const txid = response
         resolve({ txid, response })

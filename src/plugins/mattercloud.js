@@ -37,7 +37,11 @@ module.exports = class Mattercloud extends ApiClass {
           const txid = response.result.txid
           resolve({ txid, response })
         } else {
-          throw new Error(`Could not broadcast transaction`)
+          let err = response.message
+          if (response.error === 'TXN-MEMPOOL-CONFLICT') {
+            err = 'Transaction already in the mempool'
+          }
+          throw new Error(`ERROR: ${err}`)
         }
       } catch (err) {
         resolve({ error: err.message, response })
