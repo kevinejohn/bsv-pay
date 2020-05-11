@@ -4,8 +4,9 @@ const { DEFAULT_RATE } = require('./config')
 class BsvPay {
   constructor (params) {
     this.plugins = []
-    const { fetchFunc } = params
-    Plugins.map(Plugin => {
+    const { fetchFunc, plugins = [] } = params
+    const usePlugins = [...plugins, ...Plugins]
+    usePlugins.map(Plugin => {
       const name = Plugin.getName()
       if (params[name] !== false) {
         try {
