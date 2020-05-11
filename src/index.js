@@ -4,12 +4,16 @@ const { DEFAULT_RATE } = require('./config')
 class BsvPay {
   constructor (params) {
     this.plugins = []
+    const { fetchFunc } = params
     Plugins.map(Plugin => {
       const name = Plugin.getName()
       if (params[name] !== false) {
-        const { fetchFunc } = params
-        const plugin = new Plugin({ ...params[name], name, fetchFunc })
-        this.plugins.push(plugin)
+        try {
+          const plugin = new Plugin({ ...params[name], name, fetchFunc })
+          this.plugins.push(plugin)
+        } catch (err) {
+          console.log(`bsv-pay: plugin ${name} disabled. ${err.message}`)
+        }
       }
     })
   }
