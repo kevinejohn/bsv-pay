@@ -51,7 +51,7 @@ class MinerClass {
         throw new Error(`Invalid`)
       }
     } catch (err) {
-      const TRY_AGAIN = 1000
+      const TRY_AGAIN = 60 * 1000
       console.log(
         `bsv-pay: Could not get rates for ${
           this.name
