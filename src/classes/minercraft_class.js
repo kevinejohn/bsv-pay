@@ -2,8 +2,9 @@ const Minercraft = require('minercraft')
 const { DEFAULT_RATE } = require('../config')
 
 class MinerClass {
-  constructor ({ name, url, token }) {
+  constructor ({ name, url, token, DEBUG }) {
     this.name = name
+    this.DEBUG = DEBUG
     const params = { url }
     if (token) params.headers = { token }
     this.miner = new Minercraft(params)
@@ -52,12 +53,13 @@ class MinerClass {
       }
     } catch (err) {
       const TRY_AGAIN = 60 * 1000
-      console.log(
-        `bsv-pay: Could not get rates for ${
-          this.name
-        }. Retrying in ${TRY_AGAIN / 1000} seconds...`,
-        err.message
-      )
+      this.DEBUG &&
+        console.log(
+          `bsv-pay: Could not get rates for ${
+            this.name
+          }. Retrying in ${TRY_AGAIN / 1000} seconds...`,
+          err.message
+        )
       await new Promise(resolve => setTimeout(resolve, TRY_AGAIN))
       this.refreshRates()
     }

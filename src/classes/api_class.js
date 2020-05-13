@@ -1,8 +1,9 @@
 const { DEFAULT_RATE } = require('../config')
 
 class ApiClass {
-  constructor ({ name, fetchFunc }) {
+  constructor ({ name, DEBUG, fetchFunc }) {
     this.name = name
+    this.DEBUG = DEBUG
     this.fetchFunc = fetchFunc
     if (!this.fetchFunc) throw new Error(`Missing fetchFunc!`)
     if (!this.name) throw new Error(`Missing name!`)
