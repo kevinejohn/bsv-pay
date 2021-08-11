@@ -9,10 +9,10 @@
   "author": "Kevin Johnson (KevinEJohn)",
   "license": "MIT",
   "dependencies": {
-    "minercraft": "0.0.7"
+    "minercraft": "0.0.8"
   },
   "devDependencies": {
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.1"
   },
   "keywords": [
     "bitcoin",

@@ -15,15 +15,17 @@ class MinerClass {
     let response
     try {
       response = await this.miner.tx.push(txhex, { verbose })
-      // console.log(response)
-      let txid = response.payload ? response.payload.txid : response.txid
-      if (!txid || !txid.match(/[0-9A-Fa-f]{64}/)) {
-        const error = response.payload
-          ? response.payload.resultDescription
-          : response.resultDescription
-        throw new Error(error || `Unknown error`)
+      if (response.error) throw Error(response.error)
+      if (!response.payload) throw Error('Missing payload')
+      if (response.payload.returnResult !== 'success') {
+        throw Error(
+          `Result ${response.payload.returnResult}: ${response.payload.resultDescription}`
+        )
       }
-      txid = txid.match(/[0-9A-Fa-f]{64}/)[0]
+      const txid = response.payload.txid
+      if (!txid || Buffer.from(txid, 'hex').toString('hex') !== txid) {
+        throw Error('Missing txid')
+      }
       return { txid, response }
     } catch (err) {
       return { error: err.message, response }
