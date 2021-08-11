@@ -15,6 +15,8 @@ class MinerClass {
     let response
     try {
       response = await this.miner.tx.push(txhex, { verbose })
+      if (this.DEBUG)
+        console.log(`bsv-pay: broadcast ${this.name} response`, response)
       if (response.error) throw Error(response.error)
       if (!response.payload) throw Error('Missing payload')
       if (response.payload.returnResult !== 'success') {
