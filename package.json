@@ -1,6 +1,6 @@
 {
   "name": "bsv-pay",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Broadcast bitcoin transactions to miners",
   "main": "./src/index.js",
   "scripts": {
