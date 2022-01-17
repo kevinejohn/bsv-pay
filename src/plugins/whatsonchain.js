@@ -24,7 +24,8 @@ module.exports = class Whatsonchain extends ApiClass {
         )
         response = await res.json()
         // console.log(`Whatsonchain.com response`, txid)
-        if (!response || response.length !== 64) {
+        const hexstr = /^[a-f0-9]{64}$/gi
+        if (!hexstr.test(response)) {
           throw new Error(`ERROR: ${response}`)
         }
         const txid = response

@@ -28,11 +28,12 @@ module.exports = class Mattercloud extends ApiClass {
         )
         response = await res.json()
         // console.log(`mattercloud response`, response)
+        const hexstr = /^[a-f0-9]{64}$/gi
         if (
           response.success &&
           response.result &&
           response.result.txid &&
-          response.result.txid.length === 64
+          hexstr.test(response.result.txid)
         ) {
           const txid = response.result.txid
           resolve({ txid, response })
