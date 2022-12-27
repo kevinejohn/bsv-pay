@@ -11,6 +11,7 @@ Broadcast bitcoin transactions to miners
 - mempool
 - taal
 - whatsonchain
+- gorillapool
 
 ### Use
 

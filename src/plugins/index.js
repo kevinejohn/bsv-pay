@@ -12,6 +12,6 @@ module.exports = [
   Mempool,
   Taal,
   Matterpool,
-  Bitails,
+//   Bitails, // Currently does not provide pubkey and signature
   GorillaPool,
 ];
