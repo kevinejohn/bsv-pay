@@ -4,7 +4,8 @@ module.exports = class Taal extends MinercraftClass {
   constructor () {
     const url = 'https://merchantapi.taal.com'
     const name = 'taal'
-    super({ url, name })
+    if (!params.token) throw new Error(`Missing token`)
+    super({ headers: {Authorization: params.token}, url, name })
   }
 
   static getName () {
