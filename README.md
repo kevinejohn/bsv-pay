@@ -6,9 +6,6 @@ Broadcast bitcoin transactions to miners
 
 ### Current supported services:
 
-- mattercloud
-- matterpool
-- mempool
 - taal
 - whatsonchain
 - gorillapool
@@ -17,23 +14,19 @@ Broadcast bitcoin transactions to miners
 
 `npm install bsv-pay`
 
-```
-const BsvPay = require('bsv-pay')
+```js
+const BsvPay = require("bsv-pay");
 
 const pay = new BsvPay({
-    fetchFunc: require('node-fetch'),  // Node.js
-    // fetchFunc: fetch, // Browser
-    mattercloud: {
-        api_key: ''
-    },
-    mempool: {
-        token: ''
-    },
-    // whatsonchain: false // To disable specific service
-})
-const { txid } = await pay.broadcast({ tx, verbose: false })
-const { valid } = await pay.status({ txid, verbose: true })
-pay.feePerKb()
+  fetchFunc: require("isomorphic-fetch"),
+  // fetchFunc: fetch, // Browser
+  // whatsonchain: false // To disable specific service
+  // taal: false,
+  // gorillapool: false,
+});
+const { txid } = await pay.broadcast({ tx, verbose: false });
+const { valid } = await pay.status({ txid, verbose: true });
+pay.feePerKb();
 ```
 
 ### Tests

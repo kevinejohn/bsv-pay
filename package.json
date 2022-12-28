@@ -11,9 +11,6 @@
   "dependencies": {
     "minercraft": "0.0.8"
   },
-  "devDependencies": {
-    "node-fetch": "^2.6.1"
-  },
   "keywords": [
     "bitcoin",
     "bsv",
