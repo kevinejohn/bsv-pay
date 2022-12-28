@@ -2,11 +2,11 @@ const Minercraft = require('minercraft')
 const { DEFAULT_RATE } = require('../config')
 
 class MinerClass {
-  constructor ({ name, url, token, DEBUG }) {
+  constructor ({ name, url, headers, DEBUG }) {
     this.name = name
     this.DEBUG = DEBUG
     const params = { url }
-    if (token) params.headers = { token }
+    params.headers = headers
     this.miner = new Minercraft(params)
     this.refreshRates()
   }
