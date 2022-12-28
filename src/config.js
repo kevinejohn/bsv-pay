@@ -1,5 +1,5 @@
-const DEFAULT_RATE = 500
+const DEFAULT_RATE = 50;
 
 module.exports = {
-  DEFAULT_RATE
-}
+  DEFAULT_RATE,
+};
