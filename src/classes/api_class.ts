@@ -1,6 +1,11 @@
-const { DEFAULT_RATE } = require("../config")
+import { DEFAULT_RATE } from "../config"
 
-class ApiClass {
+export default class ApiClass {
+  name: string
+  DEBUG: boolean
+  fetchFunc: any
+  api_key?: string
+
   constructor({ name, DEBUG, fetchFunc }) {
     this.name = name
     this.DEBUG = DEBUG
@@ -9,7 +14,7 @@ class ApiClass {
     if (!this.name) throw new Error(`Missing name!`)
   }
 
-  async broadcast() {
+  async broadcast({ txhex }: { txhex: string }) {
     throw new Error(`Missing broacast function!`)
   }
 
@@ -21,5 +26,3 @@ class ApiClass {
     return DEFAULT_RATE
   }
 }
-
-module.exports = ApiClass

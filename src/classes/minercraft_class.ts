@@ -1,11 +1,26 @@
-const Minercraft = require("minercraft")
-const { DEFAULT_RATE } = require("../config")
+import Minercraft from "minercraft"
+import { DEFAULT_RATE } from "../config"
 
-class MinerClass {
-  constructor({ name, url, headers, DEBUG }) {
+export default class MinerClass {
+  name: string
+  DEBUG: boolean
+  miner: any
+  dataRate: number
+
+  constructor({
+    name,
+    url,
+    headers,
+    DEBUG,
+  }: {
+    name?: string
+    url: string
+    headers: any
+    DEBUG?: boolean
+  }) {
     this.name = name
     this.DEBUG = DEBUG
-    const params = { url }
+    const params: any = { url }
     params.headers = headers
     this.miner = new Minercraft(params)
     this.refreshRates()
@@ -41,7 +56,7 @@ class MinerClass {
       // console.log(this.name, rate)
       if (rate.valid && rate.mine.data > 0) {
         this.dataRate = rate.mine.data * 1000
-        let nextUpdate = new Date(rate.expires) - new Date()
+        let nextUpdate = new Date(rate.expires).getTime() - new Date().getTime()
         nextUpdate -= 30 * 1000 // 30 seconds buffer time
         if (!(nextUpdate > 0) || nextUpdate < MIN_REFRESH) {
           nextUpdate = MIN_REFRESH
@@ -77,5 +92,3 @@ class MinerClass {
     return Math.min(DEFAULT_RATE, this.dataRate || DEFAULT_RATE)
   }
 }
-
-module.exports = MinerClass

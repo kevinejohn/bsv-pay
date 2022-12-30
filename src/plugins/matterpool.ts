@@ -1,6 +1,6 @@
-const MinercraftClass = require("../classes/minercraft_class")
+import { MinercraftClass } from "../classes"
 
-module.exports = class Plugin extends MinercraftClass {
+export default class Plugin extends MinercraftClass {
   constructor(params) {
     const url = "https://merchantapi.matterpool.io"
     super({ ...params, url })

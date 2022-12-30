@@ -1,6 +1,6 @@
-const ApiClass = require("../classes/api_class")
+import { ApiClass } from "../classes"
 
-module.exports = class Mattercloud extends ApiClass {
+export default class Mattercloud extends ApiClass {
   constructor(params) {
     super(params)
     if (!params.api_key) throw new Error(`Missing mattercloud api_key`)
@@ -11,7 +11,7 @@ module.exports = class Mattercloud extends ApiClass {
     return "mattercloud"
   }
 
-  broadcast({ txhex }) {
+  async broadcast({ txhex }): Promise<any> {
     return new Promise(async (resolve, reject) => {
       let response
       try {

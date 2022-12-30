@@ -1,6 +1,6 @@
-const MinercraftClass = require("../classes/minercraft_class")
+import { MinercraftClass } from "../classes"
 
-module.exports = class Taal extends MinercraftClass {
+export default class Taal extends MinercraftClass {
   constructor(params) {
     const url = "https://merchantapi.taal.com"
     const name = "taal"

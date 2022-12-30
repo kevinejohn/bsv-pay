@@ -1,0 +1,15 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions": {
+    "strict": false,
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "declaration": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "typeRoots": ["./node_modules/@types/", "./@types"]
+  },
+  "include": ["./src", "./@types"]
+}

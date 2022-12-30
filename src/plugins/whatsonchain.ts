@@ -1,6 +1,8 @@
-const ApiClass = require("../classes/api_class")
+import { ApiClass } from "../classes"
 
-module.exports = class Whatsonchain extends ApiClass {
+export default class Whatsonchain extends ApiClass {
+  params: any
+
   constructor(params) {
     super(params)
     this.params = params
@@ -10,7 +12,7 @@ module.exports = class Whatsonchain extends ApiClass {
     return "whatsonchain"
   }
 
-  broadcast({ txhex }) {
+  broadcast({ txhex }): Promise<any> {
     return new Promise(async resolve => {
       let response
       try {

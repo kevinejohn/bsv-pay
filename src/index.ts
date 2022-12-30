@@ -1,7 +1,12 @@
-const Plugins = require("./plugins")
-const { DEFAULT_RATE } = require("./config")
+import Plugins from "./plugins"
+import { DEFAULT_RATE } from "./config"
 
-class BsvPay {
+import type { MinercraftClass } from "./classes"
+
+export default class BsvPay {
+  DEBUG: boolean
+  plugins: MinercraftClass[]
+
   constructor(params) {
     this.plugins = []
     const { fetchFunc, DEBUG, plugins = [] } = params
@@ -43,12 +48,11 @@ class BsvPay {
               err = result.error
             }
           } catch (err) {
-            this.DEBUG && this.console(`bsv-pay: broadcast error`, err)
+            this.DEBUG && console.error(`bsv-pay: broadcast error`, err)
           }
         })
       )
       if (typeof callback === "function") callback(report)
-      resolve()
     })
     if (result) return result
     throw new Error(err)
@@ -67,7 +71,7 @@ class BsvPay {
               resolve(status)
             }
           } catch (err) {
-            this.DEBUG && this.console(`bsv-pay: status error`, err)
+            this.DEBUG && console.error(`bsv-pay: status error`, err)
           }
         })
       )
@@ -83,5 +87,3 @@ class BsvPay {
     )
   }
 }
-
-module.exports = BsvPay

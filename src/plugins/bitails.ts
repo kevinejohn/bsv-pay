@@ -1,6 +1,6 @@
-const MinercraftClass = require("../classes/minercraft_class")
+import { MinercraftClass } from "../classes"
 
-module.exports = class Plugin extends MinercraftClass {
+export default class Plugin extends MinercraftClass {
   constructor(params) {
     const url = "https://mapi.bitails.net"
     super({ ...params, url, name: "bitails" })
