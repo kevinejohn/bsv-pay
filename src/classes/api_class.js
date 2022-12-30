@@ -1,7 +1,7 @@
-const { DEFAULT_RATE } = require('../config')
+const { DEFAULT_RATE } = require("../config")
 
 class ApiClass {
-  constructor ({ name, DEBUG, fetchFunc }) {
+  constructor({ name, DEBUG, fetchFunc }) {
     this.name = name
     this.DEBUG = DEBUG
     this.fetchFunc = fetchFunc
@@ -9,15 +9,15 @@ class ApiClass {
     if (!this.name) throw new Error(`Missing name!`)
   }
 
-  async broadcast () {
+  async broadcast() {
     throw new Error(`Missing broacast function!`)
   }
 
-  async status () {
+  async status() {
     return `Not implimented`
   }
 
-  getRate () {
+  getRate() {
     return DEFAULT_RATE
   }
 }

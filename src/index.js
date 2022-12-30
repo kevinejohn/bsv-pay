@@ -1,8 +1,8 @@
-const Plugins = require('./plugins')
-const { DEFAULT_RATE } = require('./config')
+const Plugins = require("./plugins")
+const { DEFAULT_RATE } = require("./config")
 
 class BsvPay {
-  constructor (params) {
+  constructor(params) {
     this.plugins = []
     const { fetchFunc, DEBUG, plugins = [] } = params
     this.DEBUG = DEBUG
@@ -11,7 +11,12 @@ class BsvPay {
       const name = Plugin.getName()
       if (params[name] !== false) {
         try {
-          const plugin = new Plugin({ ...params[name], DEBUG, name, fetchFunc })
+          const plugin = new Plugin({
+            ...params[name],
+            DEBUG,
+            name,
+            fetchFunc,
+          })
           this.plugins.push(plugin)
         } catch (err) {
           console.log(`bsv-pay: plugin ${name} disabled. ${err.message}`)
@@ -20,9 +25,9 @@ class BsvPay {
     })
   }
 
-  async broadcast ({ tx, verbose, callback }) {
-    if (typeof tx !== 'string') {
-      tx = tx.toBuffer().toString('hex')
+  async broadcast({ tx, verbose, callback }) {
+    if (typeof tx !== "string") {
+      tx = tx.toBuffer().toString("hex")
     }
     let err
     const result = await new Promise(async resolve => {
@@ -42,14 +47,14 @@ class BsvPay {
           }
         })
       )
-      if (typeof callback === 'function') callback(report)
+      if (typeof callback === "function") callback(report)
       resolve()
     })
     if (result) return result
     throw new Error(err)
   }
 
-  async status ({ txid, verbose, callback }) {
+  async status({ txid, verbose, callback }) {
     const result = await new Promise(async resolve => {
       const report = {}
       await Promise.all(
@@ -66,13 +71,13 @@ class BsvPay {
           }
         })
       )
-      if (typeof callback === 'function') callback(report)
+      if (typeof callback === "function") callback(report)
       resolve(false)
     })
     return result
   }
 
-  feePerKb () {
+  feePerKb() {
     return Math.min(
       ...this.plugins.map(plugin => plugin.getRate() || DEFAULT_RATE)
     )
