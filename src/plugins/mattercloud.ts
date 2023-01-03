@@ -1,7 +1,10 @@
-import { ApiClass } from "../classes"
+import ApiPlugin from "../classes/api"
 
-export default class Mattercloud extends ApiClass {
-  constructor(params) {
+export default class MattercloudPlugin extends ApiPlugin {
+  api_key: string
+  name = "mattercloud"
+
+  constructor(params: { api_key: string }) {
     super(params)
     if (!params.api_key) throw new Error(`Missing mattercloud api_key`)
     this.api_key = params.api_key

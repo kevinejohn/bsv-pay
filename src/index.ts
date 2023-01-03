@@ -1,19 +1,20 @@
 import Plugins from "./plugins"
 import { DEFAULT_RATE } from "./config"
 
-import type { MinercraftClass } from "./classes"
+import type { ProviderPlugin } from "./classes"
 
 export default class BsvPay {
   DEBUG: boolean
-  plugins: MinercraftClass[]
+  plugins: ProviderPlugin[]
 
   constructor(params) {
     this.plugins = []
-    const { fetchFunc, DEBUG, plugins = [] } = params
+    const plugins = params.plugins as ProviderPlugin[]
+    const { fetchFunc, DEBUG } = params
     this.DEBUG = DEBUG
     const usePlugins = [...plugins, ...Plugins]
     usePlugins.map(Plugin => {
-      const name = Plugin.getName()
+      const name = Plugin.name
       if (params[name] !== false) {
         try {
           const plugin = new Plugin({
@@ -34,15 +35,18 @@ export default class BsvPay {
     if (typeof tx !== "string") {
       tx = tx.toBuffer().toString("hex")
     }
+
+    // Try all plugins in parallel, resolve as soon as one returns a success message
+    // Throw if no plugin was successful
     let err
     const result = await new Promise(async resolve => {
-      const report = {}
+      const report: any = {}
       await Promise.all(
         this.plugins.map(async plugin => {
           try {
             const result = await plugin.broadcast({ txhex: tx, verbose })
             report[plugin.name] = result
-            if (result.txid) {
+            if ("txid" in result) {
               resolve(result)
             } else if (result.error && !err) {
               err = result.error
@@ -54,13 +58,14 @@ export default class BsvPay {
       )
       if (typeof callback === "function") callback(report)
     })
+
     if (result) return result
     throw new Error(err)
   }
 
   async status({ txid, verbose, callback }) {
     const result = await new Promise(async resolve => {
-      const report = {}
+      const report: any = {}
       await Promise.all(
         this.plugins.map(async plugin => {
           try {

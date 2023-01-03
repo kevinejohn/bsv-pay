@@ -1,35 +1,35 @@
 import Minercraft from "minercraft"
+import { ProviderPlugin, broadcastResult, fetchFunc } from "."
 import { DEFAULT_RATE } from "../config"
 
-export default class MinerClass {
-  name: string
+export default abstract class MApiPlugin implements ProviderPlugin {
+  abstract name: string
   DEBUG: boolean
   miner: any
-  dataRate: number
+  fetchFunc: fetchFunc
+  abstract url: string
+  dataRate?: number
 
-  constructor({
-    name,
-    url,
-    headers,
-    DEBUG,
-  }: {
-    name?: string
-    url: string
-    headers: any
-    DEBUG?: boolean
-  }) {
-    this.name = name
-    this.DEBUG = DEBUG
-    const params: any = { url }
-    params.headers = headers
-    this.miner = new Minercraft(params)
+  abstract getMapiConfig(): { url: string; headers?: any }
+
+  constructor({ DEBUG, fetchFunc }: { DEBUG?: boolean; fetchFunc: fetchFunc }) {
+    this.DEBUG = DEBUG || false
+    this.fetchFunc = fetchFunc
+
+    this.miner = new Minercraft(this.getMapiConfig())
     this.refreshRates()
   }
 
-  async broadcast({ txhex, verbose }) {
+  async broadcast({
+    txhex,
+    verbose,
+  }: {
+    txhex: string
+    verbose: boolean
+  }): Promise<broadcastResult> {
     let response
     try {
-      response = await this.miner.tx.push(txhex, { verbose })
+      response = await this.miner.tx.push(txhex, { verbose: true })
       if (this.DEBUG)
         console.log(`bsv-pay: broadcast ${this.name} response`, response)
       if (response.error) throw Error(response.error)
@@ -43,9 +43,9 @@ export default class MinerClass {
       if (!txid || Buffer.from(txid, "hex").toString("hex") !== txid) {
         throw Error("Missing txid")
       }
-      return { txid, response }
+      return { txid, response: verbose ? response : response.payload }
     } catch (err) {
-      return { error: err.message, response }
+      return { error: (err as Error).message, response }
     }
   }
 
@@ -77,14 +77,20 @@ export default class MinerClass {
           `bsv-pay: Could not get rates for ${this.name}. Retrying in ${
             TRY_AGAIN / 1000
           } seconds...`,
-          err.message
+          (err as Error).message
         )
       await new Promise(resolve => setTimeout(resolve, TRY_AGAIN))
       this.refreshRates()
     }
   }
 
-  status({ txid, verbose }) {
+  async status({
+    txid,
+    verbose,
+  }: {
+    txid: string
+    verbose: boolean
+  }): Promise<{ valid: boolean }> {
     return this.miner.tx.status(txid, { verbose })
   }
 

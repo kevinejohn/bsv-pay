@@ -1,12 +1,10 @@
-import { MinercraftClass } from "../classes"
+import MApiPlugin from "../classes/mapi"
 
-export default class Plugin extends MinercraftClass {
-  constructor(params) {
-    const url = "https://mapi.gorillapool.io"
-    super({ ...params, url, name: "gorillapool" })
-  }
+export default class GorillapoolPlugin extends MApiPlugin {
+  name = "gorillapool"
+  url = "https://mapi.bitails.net"
 
-  static getName() {
-    return "gorillapool"
+  getMapiConfig() {
+    return { url: this.url }
   }
 }
