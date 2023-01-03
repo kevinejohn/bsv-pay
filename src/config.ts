@@ -1,1 +1,1 @@
-export const DEFAULT_RATE = 500
+export const DEFAULT_RATE = 50

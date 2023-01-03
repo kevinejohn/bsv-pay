@@ -1,17 +1,11 @@
-import Whatsonchain from "./whatsonchain"
-import Mattercloud from "./mattercloud"
-import Mempool from "./mempool"
-import Taal from "./taal"
-import Matterpool from "./matterpool"
-import Bitails from "./bitails"
-import GorillaPool from "./gorillapool"
+const Whatsonchain = require("./whatsonchain")
+const Taal = require("./taal")
+// const Bitails = require("./bitails");
+const GorillaPool = require("./gorillapool")
 
-export default [
+module.exports = [
   Whatsonchain,
-  Mattercloud,
-  Mempool,
   Taal,
-  Matterpool,
   //   Bitails, // Currently does not provide pubkey and signature
   GorillaPool,
 ]
