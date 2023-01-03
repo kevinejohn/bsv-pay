@@ -1,23 +1,22 @@
 import Minercraft from "minercraft"
-import { ProviderPlugin, broadcastResult, fetchFunc } from "."
+import { ProviderPlugin, broadcastResult, PluginOptions, statusResult } from "."
 import { DEFAULT_RATE } from "../config"
 
-export default abstract class MApiPlugin implements ProviderPlugin {
+export default abstract class MApiPlugin extends ProviderPlugin {
   abstract name: string
-  DEBUG: boolean
   miner: any
-  fetchFunc: fetchFunc
   abstract url: string
   dataRate?: number
 
-  abstract getMapiConfig(): { url: string; headers?: any }
-
-  constructor({ DEBUG, fetchFunc }: { DEBUG?: boolean; fetchFunc: fetchFunc }) {
-    this.DEBUG = DEBUG || false
-    this.fetchFunc = fetchFunc
+  constructor({ DEBUG, fetchFunc }: PluginOptions) {
+    super({ DEBUG, fetchFunc })
 
     this.miner = new Minercraft(this.getMapiConfig())
     this.refreshRates()
+  }
+
+  getMapiConfig(): { url: string; headers?: any } {
+    return { url: this.url }
   }
 
   async broadcast({
@@ -90,7 +89,7 @@ export default abstract class MApiPlugin implements ProviderPlugin {
   }: {
     txid: string
     verbose: boolean
-  }): Promise<{ valid: boolean }> {
+  }): Promise<statusResult> {
     return this.miner.tx.status(txid, { verbose })
   }
 

@@ -1,18 +1,28 @@
-import { ApiClass } from "../classes"
+import { broadcastResult } from "../classes"
+import { ProviderPlugin } from "../classes"
 
-export default class Whatsonchain extends ApiClass {
-  params: any
+export default class WhatsonchainPlugin extends ProviderPlugin {
+  name = "whatsonchain"
 
-  constructor(params) {
-    super(params)
-    this.params = params
+  async status({
+    txid,
+    verbose,
+  }: {
+    txid: string
+    verbose: boolean
+  }): Promise<{ valid: boolean }> {
+    // TODO: Implement
+
+    return { valid: false }
   }
 
-  static getName() {
-    return "whatsonchain"
-  }
-
-  broadcast({ txhex }): Promise<any> {
+  async broadcast({
+    txhex,
+    verbose,
+  }: {
+    txhex: string
+    verbose: boolean
+  }): Promise<broadcastResult> {
     return new Promise(async resolve => {
       let response
       try {
@@ -33,7 +43,7 @@ export default class Whatsonchain extends ApiClass {
         const txid = response
         resolve({ txid, response })
       } catch (err) {
-        resolve({ error: err.message, response })
+        resolve({ error: (err as Error).message, response })
       }
     })
   }

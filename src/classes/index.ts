@@ -1,20 +1,27 @@
-import type { RequestInfo, RequestInit, Response } from "node-fetch"
+import { DEFAULT_RATE } from "../config"
 
-export type fetchFunc = (
-  url: RequestInfo,
-  init?: RequestInit
-) => Promise<Response>
+import type { FetchFunc } from "../../@types/node-fetch"
+
+export type PluginOptions = { DEBUG?: boolean; fetchFunc: FetchFunc }
 
 export type broadcastResult =
   | { txid: string; response: any }
   | { error: string; response: any }
 
-export interface ProviderPlugin {
-  name: string
-  DEBUG: boolean
-  fetchFunc: fetchFunc
+export type statusResult = { valid: boolean }
 
-  broadcast({
+export abstract class ProviderPlugin {
+  abstract name: string
+  DEBUG: boolean
+  fetchFunc: FetchFunc
+
+  constructor(params: PluginOptions) {
+    this.DEBUG = params.DEBUG || false
+    this.fetchFunc = params.fetchFunc
+
+    if (!this.fetchFunc) throw new Error(`Missing fetchFunc!`)
+  }
+  abstract broadcast({
     txhex,
     verbose,
   }: {
@@ -22,13 +29,15 @@ export interface ProviderPlugin {
     verbose: boolean
   }): Promise<broadcastResult>
 
-  status({
+  abstract status({
     txid,
     verbose,
   }: {
     txid: string
     verbose: boolean
-  }): Promise<{ valid: boolean }>
+  }): Promise<statusResult>
 
-  getRate(): number
+  getRate(): number {
+    return DEFAULT_RATE
+  }
 }

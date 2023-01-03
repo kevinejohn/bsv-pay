@@ -1,15 +1,22 @@
-import { MinercraftClass } from "../classes"
+import MApiPlugin from "../classes/mapi"
+import { MapiConstructorArgs } from "../classes/mapi"
 
-export default class Taal extends MinercraftClass {
-  constructor(params) {
-    const url = "https://merchantapi.taal.com"
-    const name = "taal"
+export default class TaalPlugin extends MApiPlugin {
+  url = "https://merchantapi.taal.com"
+  name = "taal"
+  token: string
+
+  constructor(params: MapiConstructorArgs & { token: string }) {
+    super(params)
 
     if (!params.token) throw new Error(`Missing token`)
-    super({ headers: { Authorization: params.token }, url, name })
+    this.token = params.token
   }
 
-  static getName() {
-    return "taal"
+  getMapiConfig(): { url: string; headers?: any } {
+    const config = super.getMapiConfig()
+    config.headers = { Authorization: this.token }
+
+    return config
   }
 }
