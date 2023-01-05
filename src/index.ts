@@ -1,12 +1,7 @@
 import Plugins from "./plugins"
 import { DEFAULT_RATE } from "./config"
 
-import type {
-  ProviderPlugin,
-  PluginOptions,
-  broadcastResult,
-  statusResult,
-} from "./classes"
+import type { ProviderPlugin, PluginOptions, broadcastResult } from "./classes"
 import type { FetchFunc } from "../@types/node-fetch"
 import type { Tx } from "bsv"
 
@@ -24,7 +19,7 @@ type broadcastReport = {
 }
 
 type statusReport = {
-  [plugin: string]: statusResult
+  [plugin: string]: any
 }
 
 export default class BsvPay {
@@ -47,6 +42,7 @@ export default class BsvPay {
         }
 
         try {
+          // @ts-ignore Doesn't recognize instance of abstract class sub-class
           const plugin = new Plugin({
             DEBUG,
             fetchFunc,
@@ -112,7 +108,7 @@ export default class BsvPay {
     txid: string
     verbose: boolean
     callback: (report: statusReport) => void
-  }): Promise<statusReport | false | (statusResult & { name: string })> {
+  }): Promise<statusReport | false | (any & { name: string })> {
     return await new Promise(async resolve => {
       const report: statusReport = {}
 
@@ -124,7 +120,6 @@ export default class BsvPay {
 
             if (status.valid === true) {
               resolve({ ...status, name: plugin.name })
-              // resolve(status)
             }
           } catch (err) {
             this.DEBUG && console.error(`bsv-pay: status error`, err)

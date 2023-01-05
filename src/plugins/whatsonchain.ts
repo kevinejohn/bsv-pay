@@ -10,10 +10,10 @@ export default class WhatsonchainPlugin extends ProviderPlugin {
   }: {
     txid: string
     verbose: boolean
-  }): Promise<{ valid: boolean }> {
+  }): Promise<any> {
     // TODO: Implement
 
-    return { valid: false }
+    return {}
   }
 
   async broadcast({

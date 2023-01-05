@@ -1,17 +1,19 @@
-import Minercraft from "minercraft"
-import { ProviderPlugin, broadcastResult, PluginOptions, statusResult } from "."
+import MapiClient from "../mapi"
+import { mapiReponse, pushResponsePayload, statusReponsePayload } from "../mapi"
+import { ProviderPlugin, broadcastResult, PluginOptions } from "."
 import { DEFAULT_RATE } from "../config"
 
 export default abstract class MApiPlugin extends ProviderPlugin {
   abstract name: string
-  miner: any
+  mapi: MapiClient
   abstract url: string
   dataRate?: number
 
   constructor({ DEBUG, fetchFunc }: PluginOptions) {
     super({ DEBUG, fetchFunc })
 
-    this.miner = new Minercraft(this.getMapiConfig())
+    const mapiConfig = this.getMapiConfig()
+    this.mapi = new MapiClient(mapiConfig.url, mapiConfig.headers, fetchFunc)
     this.refreshRates()
   }
 
@@ -26,12 +28,20 @@ export default abstract class MApiPlugin extends ProviderPlugin {
     txhex: string
     verbose: boolean
   }): Promise<broadcastResult> {
-    let response
+    let response: mapiReponse<pushResponsePayload>
     try {
-      response = await this.miner.tx.push(txhex, { verbose: true })
+      response = (await this.mapi.pushTx(
+        txhex,
+        true
+      )) as mapiReponse<pushResponsePayload>
+    } catch (err) {
+      return { error: (err as Error).message }
+    }
+
+    try {
       if (this.DEBUG)
         console.log(`bsv-pay: broadcast ${this.name} response`, response)
-      if (response.error) throw Error(response.error)
+
       if (!response.payload) throw Error("Missing payload")
       if (response.payload.returnResult !== "success") {
         throw Error(
@@ -51,23 +61,26 @@ export default abstract class MApiPlugin extends ProviderPlugin {
   async refreshRates() {
     const MIN_REFRESH = 60 * 1000
     try {
-      const rate = await this.miner.fee.rate()
-      // console.log(this.name, rate)
-      if (rate.valid && rate.mine.data > 0) {
+      const rate = await this.mapi.getFeeRate()
+
+      if (rate.mine.data > 0) {
         this.dataRate = rate.mine.data * 1000
+
         let nextUpdate = new Date(rate.expires).getTime() - new Date().getTime()
         nextUpdate -= 30 * 1000 // 30 seconds buffer time
         if (!(nextUpdate > 0) || nextUpdate < MIN_REFRESH) {
           nextUpdate = MIN_REFRESH
         }
-        // console.log(
-        //   `bsv-pay: Updated ${this.name} rate: ${
-        //     this.dataRate
-        //   }. Next update in ${(nextUpdate / (60 * 1000)).toFixed(1)} minutes.`
-        // )
+
+        console.debug(
+          `bsv-pay: Updated ${this.name} rate: ${
+            this.dataRate
+          }. Next update in ${(nextUpdate / (60 * 1000)).toFixed(1)} minutes.`
+        )
+
         setTimeout(() => this.refreshRates(), nextUpdate)
       } else {
-        throw new Error(`Invalid`)
+        throw new Error(`Invalid fee rate`)
       }
     } catch (err) {
       const TRY_AGAIN = 60 * 1000
@@ -89,8 +102,8 @@ export default abstract class MApiPlugin extends ProviderPlugin {
   }: {
     txid: string
     verbose: boolean
-  }): Promise<statusResult> {
-    return this.miner.tx.status(txid, { verbose })
+  }): Promise<statusReponsePayload | mapiReponse<statusReponsePayload>> {
+    return await this.mapi.getTxStatus(txid, verbose)
   }
 
   getRate() {

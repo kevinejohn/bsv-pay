@@ -6,9 +6,9 @@ export type PluginOptions = { DEBUG?: boolean; fetchFunc: FetchFunc }
 
 export type broadcastResult =
   | { txid: string; response: any }
-  | { error: string; response: any }
+  | { error: string; response?: any }
 
-export type statusResult = { valid: boolean }
+// export type statusResult = { valid: boolean }
 
 export abstract class ProviderPlugin {
   abstract name: string
@@ -35,7 +35,7 @@ export abstract class ProviderPlugin {
   }: {
     txid: string
     verbose: boolean
-  }): Promise<statusResult>
+  }): Promise<any>
 
   getRate(): number {
     return DEFAULT_RATE

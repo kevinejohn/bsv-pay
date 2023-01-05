@@ -11,9 +11,6 @@
   },
   "author": "Kevin Johnson (KevinEJohn)",
   "license": "MIT",
-  "dependencies": {
-    "minercraft": "0.0.8"
-  },
   "devDependencies": {
     "@tsconfig/node18": "^1.0.1",
     "@types/node": "^18.11.18",
