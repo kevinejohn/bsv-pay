@@ -134,17 +134,20 @@ export default class MapiClient {
     const feeRateUrl = this.url + FEE_PATH
 
     const response = await this.fetchFunc(feeRateUrl, { headers: this.headers })
-    const responseJSON = (await response.json()) as feeResponsePayload
+    const responseJSON = await response.json()
+    const payload = JSON.parse(responseJSON.payload) as feeResponsePayload
 
-    const parsedFees = (responseJSON.fees as any[]).reduce((fee, fees) => {
-      fees.mine = fees.mine[fee.feeType] =
-        fee.miningFee.satoshis / fee.miningFee.bytes
-      fees.relay[fee.feeType] = fee.relayFee.satoshis / fee.relayFee.bytes
-      return fees
-    }, {})
+    const parsedFees = (payload.fees as any[]).reduce(
+      (fees, fee) => {
+        fees.mine[fee.feeType] = fee.miningFee.satoshis / fee.miningFee.bytes
+        fees.relay[fee.feeType] = fee.relayFee.satoshis / fee.relayFee.bytes
+        return fees
+      },
+      { mine: {}, relay: {} }
+    )
 
     return {
-      expires: responseJSON.expiryTime,
+      expires: payload.expiryTime,
       ...parsedFees,
     }
   }

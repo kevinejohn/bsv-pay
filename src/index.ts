@@ -7,7 +7,7 @@ import type { Tx } from "bsv"
 
 type Options =
   | {
-      plugins?: ProviderPlugin[]
+      plugins?: typeof ProviderPlugin[]
       fetchFunc: FetchFunc
       DEBUG?: boolean
     } & {
@@ -22,7 +22,7 @@ type statusReport = {
   [plugin: string]: any
 }
 
-export default class BsvPay {
+class BsvPay {
   DEBUG: boolean
   plugins: ProviderPlugin[] = []
 
@@ -42,7 +42,7 @@ export default class BsvPay {
         }
 
         try {
-          // @ts-ignore Doesn't recognize instance of abstract class sub-class
+          // @ts-ignore
           const plugin = new Plugin({
             DEBUG,
             fetchFunc,
@@ -137,3 +137,5 @@ export default class BsvPay {
     )
   }
 }
+
+module.exports = BsvPay

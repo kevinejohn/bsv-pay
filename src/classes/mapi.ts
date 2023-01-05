@@ -6,19 +6,23 @@ import { DEFAULT_RATE } from "../config"
 export default abstract class MApiPlugin extends ProviderPlugin {
   abstract name: string
   mapi: MapiClient
-  abstract url: string
   dataRate?: number
+  headers: any
+  url: string
 
-  constructor({ DEBUG, fetchFunc }: PluginOptions) {
+  constructor({
+    DEBUG,
+    fetchFunc,
+    url,
+    headers,
+  }: PluginOptions & { url: string; headers?: any }) {
     super({ DEBUG, fetchFunc })
 
-    const mapiConfig = this.getMapiConfig()
-    this.mapi = new MapiClient(mapiConfig.url, mapiConfig.headers, fetchFunc)
-    this.refreshRates()
-  }
+    this.url = url
+    this.headers = headers || {}
 
-  getMapiConfig(): { url: string; headers?: any } {
-    return { url: this.url }
+    this.mapi = new MapiClient(this.url, this.headers, fetchFunc)
+    this.refreshRates()
   }
 
   async broadcast({
@@ -58,7 +62,7 @@ export default abstract class MApiPlugin extends ProviderPlugin {
     }
   }
 
-  async refreshRates() {
+  async refreshRates(): Promise<void> {
     const MIN_REFRESH = 60 * 1000
     try {
       const rate = await this.mapi.getFeeRate()
@@ -106,7 +110,7 @@ export default abstract class MApiPlugin extends ProviderPlugin {
     return await this.mapi.getTxStatus(txid, verbose)
   }
 
-  getRate() {
+  getRate(): number {
     return Math.min(DEFAULT_RATE, this.dataRate || DEFAULT_RATE)
   }
 }
