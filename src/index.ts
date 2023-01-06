@@ -70,12 +70,9 @@ class BsvPay {
     // Ensure backwards-compatibility if called with bsv.js tx
     const txHex = typeof tx === "string" ? tx : tx.toBuffer().toString("hex")
 
-    // Try all plugins in parallel, resolve as soon as one returns a success message
-    // Throw if no plugin was successful
-    let err: string | undefined = undefined
-
     const report: broadcastReport = {}
 
+    // Try all plugins in parallel, resolve as soon as one returns a success message
     return new Promise(async resolveReport => {
       await Promise.all(
         this.plugins.map(async plugin => {

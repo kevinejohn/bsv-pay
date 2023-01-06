@@ -37,7 +37,6 @@ export default class WhatsonchainPlugin extends ProviderPlugin {
       const response = await res.json()
 
       try {
-        // console.log(`Whatsonchain.com response`, txid)
         const hexstr = /^[a-f0-9]{64}$/gi
         if (!hexstr.test(response)) {
           throw new Error(`ERROR: ${response}`)

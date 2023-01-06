@@ -1,4 +1,4 @@
-const BsvPay = require("../src/index");
+const BsvPay = require("../index/index");
 
 const pay = new BsvPay({
   fetchFunc: require("isomorphic-fetch"),
