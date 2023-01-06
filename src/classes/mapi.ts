@@ -1,6 +1,6 @@
 import MapiClient from "../mapi"
 import { mapiReponse, pushResponsePayload, statusReponsePayload } from "../mapi"
-import { ProviderPlugin, broadcastResult, PluginOptions } from "."
+import { ProviderPlugin, broadcastResult, PluginOptions, statusResult } from "."
 import { DEFAULT_RATE } from "../config"
 
 export default abstract class MApiPlugin extends ProviderPlugin {
@@ -39,7 +39,7 @@ export default abstract class MApiPlugin extends ProviderPlugin {
         true
       )) as mapiReponse<pushResponsePayload>
     } catch (err) {
-      return { error: (err as Error).message }
+      return { error: `mAPI error: ${(err as Error).message}` }
     }
 
     try {
@@ -62,6 +62,38 @@ export default abstract class MApiPlugin extends ProviderPlugin {
     }
   }
 
+  async status({
+    txid,
+    verbose,
+  }: {
+    txid: string
+    verbose: boolean
+  }): Promise<statusResult> {
+    let response: mapiReponse<statusReponsePayload>
+    try {
+      response = (await this.mapi.getTxStatus(
+        txid,
+        true
+      )) as mapiReponse<statusReponsePayload>
+    } catch (err) {
+      return { error: `mAPI error: ${(err as Error).message}` }
+    }
+
+    try {
+      if (this.DEBUG)
+        console.log(`bsv-pay: status ${this.name} response`, response)
+
+      if (!response.payload) throw Error("Missing payload")
+      if (response.payload.returnResult !== "success") {
+        throw Error(`Result ${response.payload.returnResult}`)
+      }
+
+      return { response: verbose ? response : response.payload }
+    } catch (err) {
+      return { error: (err as Error).message, response }
+    }
+  }
+
   async refreshRates(): Promise<void> {
     const MIN_REFRESH = 60 * 1000
     try {
@@ -76,11 +108,13 @@ export default abstract class MApiPlugin extends ProviderPlugin {
           nextUpdate = MIN_REFRESH
         }
 
-        console.debug(
-          `bsv-pay: Updated ${this.name} rate: ${
-            this.dataRate
-          }. Next update in ${(nextUpdate / (60 * 1000)).toFixed(1)} minutes.`
-        )
+        if (this.DEBUG) {
+          console.log(
+            `bsv-pay: Updated ${this.name} rate: ${
+              this.dataRate
+            }. Next update in ${(nextUpdate / (60 * 1000)).toFixed(1)} minutes.`
+          )
+        }
 
         setTimeout(() => this.refreshRates(), nextUpdate)
       } else {
@@ -98,16 +132,6 @@ export default abstract class MApiPlugin extends ProviderPlugin {
       await new Promise(resolve => setTimeout(resolve, TRY_AGAIN))
       this.refreshRates()
     }
-  }
-
-  async status({
-    txid,
-    verbose,
-  }: {
-    txid: string
-    verbose: boolean
-  }): Promise<statusReponsePayload | mapiReponse<statusReponsePayload>> {
-    return await this.mapi.getTxStatus(txid, verbose)
   }
 
   getRate(): number {

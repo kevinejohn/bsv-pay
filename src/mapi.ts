@@ -89,13 +89,13 @@ export default class MapiClient {
       method: "POST",
       body: JSON.stringify({ rawtx: txhex }),
     })
-    const reponseJSON = await reponse.json()
+    const responseJSON = await reponse.json()
 
-    const payload = JSON.parse(reponseJSON.data.payload) as pushResponsePayload
+    const payload = JSON.parse(responseJSON.payload) as pushResponsePayload
 
     return verbose
       ? {
-          ...reponseJSON.data,
+          ...responseJSON.data,
           payload,
         }
       : payload
@@ -112,7 +112,7 @@ export default class MapiClient {
     })
     const reponseJSON = await reponse.json()
 
-    const payload = JSON.parse(reponseJSON.data.payload) as statusReponsePayload
+    const payload = JSON.parse(reponseJSON.payload) as statusReponsePayload
 
     return verbose
       ? {

@@ -1,14 +1,22 @@
 import { DEFAULT_RATE } from "../config"
 
 import type { FetchFunc } from "../../@types/node-fetch"
+import { mapiReponse, pushResponsePayload, statusReponsePayload } from "../mapi"
 
 export type PluginOptions = { DEBUG?: boolean; fetchFunc: FetchFunc }
 
 export type broadcastResult =
-  | { txid: string; response: any }
+  | {
+      txid: string
+      response: mapiReponse<pushResponsePayload> | pushResponsePayload
+    }
   | { error: string; response?: any }
 
-// export type statusResult = { valid: boolean }
+export type statusResult =
+  | {
+      response: mapiReponse<statusReponsePayload> | statusReponsePayload
+    }
+  | { error: string; response?: any }
 
 export abstract class ProviderPlugin {
   abstract name: string

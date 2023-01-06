@@ -1,5 +1,6 @@
-import { broadcastResult } from "../classes"
+import { broadcastResult, statusResult } from "../classes"
 import { ProviderPlugin } from "../classes"
+import { statusReponsePayload } from "../mapi"
 
 export default class WhatsonchainPlugin extends ProviderPlugin {
   name = "whatsonchain"
@@ -10,10 +11,10 @@ export default class WhatsonchainPlugin extends ProviderPlugin {
   }: {
     txid: string
     verbose: boolean
-  }): Promise<any> {
+  }): Promise<statusResult> {
     // TODO: Implement
 
-    return {}
+    return { error: "Not implemented" }
   }
 
   async broadcast({
@@ -24,17 +25,18 @@ export default class WhatsonchainPlugin extends ProviderPlugin {
     verbose: boolean
   }): Promise<broadcastResult> {
     return new Promise(async resolve => {
-      let response
+      const res = await this.fetchFunc(
+        `https://api.whatsonchain.com/v1/bsv/main/tx/raw`,
+        {
+          method: "POST",
+          body: JSON.stringify({ txhex }),
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+
+      const response = await res.json()
+
       try {
-        const res = await this.fetchFunc(
-          `https://api.whatsonchain.com/v1/bsv/main/tx/raw`,
-          {
-            method: "POST",
-            body: JSON.stringify({ txhex }),
-            headers: { "Content-Type": "application/json" },
-          }
-        )
-        response = await res.json()
         // console.log(`Whatsonchain.com response`, txid)
         const hexstr = /^[a-f0-9]{64}$/gi
         if (!hexstr.test(response)) {
