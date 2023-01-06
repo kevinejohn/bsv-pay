@@ -15,18 +15,20 @@ Broadcast bitcoin transactions to miners
 `npm install bsv-pay`
 
 ```js
-const BsvPay = require("bsv-pay");
+const BsvPay = require("bsv-pay")
 
 const pay = new BsvPay({
   fetchFunc: require("isomorphic-fetch"),
   // fetchFunc: fetch, // Browser
-  // whatsonchain: false // To disable specific service
-  // taal: false,
-  // gorillapool: false,
-});
-const { txid } = await pay.broadcast({ tx, verbose: false });
-const { valid } = await pay.status({ txid, verbose: true });
-pay.feePerKb();
+  pluginOptions: {
+    // whatsonchain: false // To disable specific service
+    // taal: false,
+    // gorillapool: false,
+  },
+})
+const { txid } = await pay.broadcast({ tx, verbose: false })
+const { valid } = await pay.status({ txid, verbose: true })
+pay.feePerKb()
 ```
 
 ### Tests

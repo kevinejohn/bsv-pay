@@ -4,6 +4,10 @@
   "description": "Broadcast bitcoin transactions to miners",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
+  "files": [
+    "lib",
+    "@types"
+  ],
   "scripts": {
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.(?:js)|(?:ts)\"",
