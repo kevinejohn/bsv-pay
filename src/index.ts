@@ -1,7 +1,12 @@
 import Plugins from "./plugins"
 import { DEFAULT_RATE } from "./config"
 
-import type { ProviderPlugin, PluginOptions, broadcastResult } from "./classes"
+import type {
+  ProviderPlugin,
+  PluginOptions,
+  broadcastResult,
+  statusResult,
+} from "./classes"
 import type { FetchFunc } from "../@types/node-fetch"
 import type { Tx } from "bsv"
 
@@ -63,7 +68,7 @@ class BsvPay {
     tx: string | Tx
     verbose?: boolean
     callback?: (report: broadcastReport) => void
-  }): Promise<broadcastReport> {
+  }): Promise<broadcastReport | broadcastResult> {
     // Ensure backwards-compatibility if called with bsv.js tx
     const txHex = typeof tx === "string" ? tx : tx.toBuffer().toString("hex")
 
@@ -84,10 +89,13 @@ class BsvPay {
           }
 
           if ("txid" in report[plugin.name]) {
-            resolveReport(report)
+            if (typeof callback === "function") callback(report)
+
+            resolveReport(report[plugin.name])
           }
         })
       )
+      if (typeof callback === "function") callback(report)
 
       resolveReport(report)
     })
@@ -101,7 +109,7 @@ class BsvPay {
     txid: string
     verbose?: boolean
     callback?: (report: statusReport) => void
-  }): Promise<statusReport> {
+  }): Promise<statusReport | statusResult> {
     return await new Promise(async resolve => {
       const report: statusReport = {}
 
@@ -114,8 +122,11 @@ class BsvPay {
             this.DEBUG && console.error(`bsv-pay: status error`, err)
             report[plugin.name] = (err as Error).message
           }
+
           if (report[plugin.name].valid === true) {
-            resolve(report)
+            if (typeof callback === "function") callback(report)
+
+            resolve(report[plugin.name])
           }
         })
       )
