@@ -1,4 +1,4 @@
-import type { FetchFunc } from "../@types/node-fetch"
+import fetch from "isomorphic-fetch"
 
 export type mapiReponse<PayloadType> = {
   payload: PayloadType
@@ -70,11 +70,7 @@ const TX_PATH = "/mapi/tx"
 export default class MapiClient {
   headers: any = { "Content-Type": "application/json" }
 
-  constructor(
-    public url: string,
-    headers: any = {},
-    public fetchFunc: FetchFunc
-  ) {
+  constructor(public url: string, headers: any = {}) {
     this.headers = Object.assign(this.headers, headers)
   }
 
@@ -84,7 +80,7 @@ export default class MapiClient {
   ): Promise<pushResponsePayload | mapiReponse<pushResponsePayload>> {
     const pushUrl = this.url + TX_PATH
 
-    const reponse = await this.fetchFunc(pushUrl, {
+    const reponse = await fetch(pushUrl, {
       headers: this.headers,
       method: "POST",
       body: JSON.stringify({ rawtx: txhex }),
@@ -107,7 +103,7 @@ export default class MapiClient {
   ): Promise<statusReponsePayload | mapiReponse<statusReponsePayload>> {
     const pushUrl = this.url + TX_PATH + "/" + txid
 
-    const reponse = await this.fetchFunc(pushUrl, {
+    const reponse = await fetch(pushUrl, {
       headers: this.headers,
     })
     const reponseJSON = await reponse.json()
@@ -133,7 +129,7 @@ export default class MapiClient {
   }> {
     const feeRateUrl = this.url + FEE_PATH
 
-    const response = await this.fetchFunc(feeRateUrl, { headers: this.headers })
+    const response = await fetch(feeRateUrl, { headers: this.headers })
     const responseJSON = await response.json()
     const payload = JSON.parse(responseJSON.payload) as feeResponsePayload
 

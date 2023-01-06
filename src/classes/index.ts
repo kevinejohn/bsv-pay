@@ -1,9 +1,8 @@
 import { DEFAULT_RATE } from "../config"
 
-import type { FetchFunc } from "../../@types/node-fetch"
 import { mapiReponse, pushResponsePayload, statusReponsePayload } from "../mapi"
 
-export type PluginOptions = { DEBUG?: boolean; fetchFunc: FetchFunc }
+export type PluginOptions = { DEBUG?: boolean }
 
 export type broadcastResult =
   | {
@@ -22,13 +21,9 @@ export type statusResult =
 export abstract class ProviderPlugin {
   abstract name: string
   DEBUG: boolean
-  fetchFunc: FetchFunc
 
   constructor(params: PluginOptions) {
     this.DEBUG = params.DEBUG || false
-    this.fetchFunc = params.fetchFunc
-
-    if (!this.fetchFunc) throw new Error(`Missing fetchFunc!`)
   }
   abstract broadcast({
     txhex,

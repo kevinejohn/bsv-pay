@@ -18,8 +18,6 @@ Broadcast bitcoin transactions to miners
 const BsvPay = require("bsv-pay")
 
 const pay = new BsvPay({
-  fetchFunc: require("isomorphic-fetch"),
-  // fetchFunc: fetch, // Browser
   pluginOptions: {
     // whatsonchain: false // To disable specific service
     // taal: false,

@@ -1,6 +1,6 @@
 import { broadcastResult, statusResult } from "../classes"
 import { ProviderPlugin } from "../classes"
-import { statusReponsePayload } from "../mapi"
+import fetch from "isomorphic-fetch"
 
 export default class WhatsonchainPlugin extends ProviderPlugin {
   name = "whatsonchain"
@@ -25,7 +25,7 @@ export default class WhatsonchainPlugin extends ProviderPlugin {
     verbose: boolean
   }): Promise<broadcastResult> {
     return new Promise(async resolve => {
-      const res = await this.fetchFunc(
+      const res = await fetch(
         `https://api.whatsonchain.com/v1/bsv/main/tx/raw`,
         {
           method: "POST",

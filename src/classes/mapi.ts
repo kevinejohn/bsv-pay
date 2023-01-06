@@ -12,16 +12,15 @@ export default abstract class MApiPlugin extends ProviderPlugin {
 
   constructor({
     DEBUG,
-    fetchFunc,
     url,
     headers,
   }: PluginOptions & { url: string; headers?: any }) {
-    super({ DEBUG, fetchFunc })
+    super({ DEBUG })
 
     this.url = url
     this.headers = headers || {}
 
-    this.mapi = new MapiClient(this.url, this.headers, fetchFunc)
+    this.mapi = new MapiClient(this.url, this.headers)
     this.refreshRates()
   }
 

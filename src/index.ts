@@ -7,12 +7,9 @@ import type {
   broadcastResult,
   statusResult,
 } from "./classes"
-import type { FetchFunc } from "../@types/node-fetch"
-import type { Tx } from "bsv"
 
 type Options = {
   plugins?: typeof ProviderPlugin[]
-  fetchFunc: FetchFunc
   DEBUG?: boolean
   pluginOptions?: { [plugin: string]: false | PluginOptions }
 }
@@ -29,12 +26,7 @@ class BsvPay {
   DEBUG: boolean
   plugins: ProviderPlugin[] = []
 
-  constructor({
-    fetchFunc,
-    DEBUG = false,
-    plugins = [],
-    pluginOptions = {},
-  }: Options) {
+  constructor({ DEBUG = false, plugins = [], pluginOptions = {} }: Options) {
     this.DEBUG = DEBUG
 
     const usePlugins = [...plugins, ...Plugins]
@@ -47,7 +39,6 @@ class BsvPay {
           // @ts-ignore
           const plugin = new Plugin({
             DEBUG,
-            fetchFunc,
             ...pluginOptions[name],
           })
           this.plugins.push(plugin)
@@ -61,17 +52,14 @@ class BsvPay {
   }
 
   async broadcast({
-    tx,
+    txhex,
     verbose = false,
     callback,
   }: {
-    tx: string | Tx
+    txhex: string
     verbose?: boolean
     callback?: (report: broadcastReport) => void
   }): Promise<broadcastReport | broadcastResult> {
-    // Ensure backwards-compatibility if called with bsv.js tx
-    const txHex = typeof tx === "string" ? tx : tx.toBuffer().toString("hex")
-
     const report: broadcastReport = {}
 
     // Try all plugins in parallel, resolve as soon as one returns a success message
@@ -79,7 +67,7 @@ class BsvPay {
       await Promise.all(
         this.plugins.map(async plugin => {
           try {
-            const res = await plugin.broadcast({ txhex: txHex, verbose })
+            const res = await plugin.broadcast({ txhex, verbose })
             report[plugin.name] = res
           } catch (err) {
             this.DEBUG && console.error(`bsv-pay: broadcast error`, err)
