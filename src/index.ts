@@ -5,14 +5,12 @@ import type { ProviderPlugin, PluginOptions, broadcastResult } from "./classes"
 import type { FetchFunc } from "../@types/node-fetch"
 import type { Tx } from "bsv"
 
-type Options =
-  | {
-      plugins?: typeof ProviderPlugin[]
-      fetchFunc: FetchFunc
-      DEBUG?: boolean
-    } & {
-      [plugin: string]: false | PluginOptions
-    }
+type Options = {
+  plugins?: typeof ProviderPlugin[]
+  fetchFunc: FetchFunc
+  DEBUG?: boolean
+  pluginOptions?: { [plugin: string]: false | PluginOptions }
+}
 
 type broadcastReport = {
   [plugin: string]: broadcastResult
@@ -26,7 +24,12 @@ class BsvPay {
   DEBUG: boolean
   plugins: ProviderPlugin[] = []
 
-  constructor({ fetchFunc, DEBUG = false, plugins = [], ...params }: Options) {
+  constructor({
+    fetchFunc,
+    DEBUG = false,
+    plugins = [],
+    pluginOptions = {},
+  }: Options) {
     this.DEBUG = DEBUG
 
     const usePlugins = [...plugins, ...Plugins]
@@ -34,19 +37,13 @@ class BsvPay {
     usePlugins.map(Plugin => {
       const name = Plugin.name
 
-      if (params[name] !== false) {
-        const pluginOptions: PluginOptions = {
-          DEBUG,
-          fetchFunc,
-          ...params[name],
-        }
-
+      if (pluginOptions[name] !== false) {
         try {
           // @ts-ignore
           const plugin = new Plugin({
             DEBUG,
             fetchFunc,
-            ...params[name],
+            ...pluginOptions[name],
           })
           this.plugins.push(plugin)
         } catch (err) {
@@ -60,12 +57,12 @@ class BsvPay {
 
   async broadcast({
     tx,
-    verbose,
+    verbose = false,
     callback,
   }: {
     tx: string | Tx
-    verbose: boolean
-    callback: (report: broadcastReport) => void
+    verbose?: boolean
+    callback?: (report: broadcastReport) => void
   }): Promise<broadcastReport> {
     // Ensure backwards-compatibility if called with bsv.js tx
     const txHex = typeof tx === "string" ? tx : tx.toBuffer().toString("hex")
@@ -98,12 +95,12 @@ class BsvPay {
 
   async status({
     txid,
-    verbose,
+    verbose = false,
     callback,
   }: {
     txid: string
-    verbose: boolean
-    callback: (report: statusReport) => void
+    verbose?: boolean
+    callback?: (report: statusReport) => void
   }): Promise<statusReport> {
     return await new Promise(async resolve => {
       const report: statusReport = {}
@@ -135,4 +132,4 @@ class BsvPay {
   }
 }
 
-module.exports = BsvPay
+export = BsvPay
