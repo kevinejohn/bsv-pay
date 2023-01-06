@@ -84,11 +84,10 @@ export default abstract class MApiPlugin extends ProviderPlugin {
         console.log(`bsv-pay: status ${this.name} response`, response)
 
       if (!response.payload) throw Error("Missing payload")
-      if (response.payload.returnResult !== "success") {
-        throw Error(`Result ${response.payload.returnResult}`)
-      }
 
-      return { response: verbose ? response : response.payload }
+      const valid = response.payload.returnResult === "success"
+
+      return { valid, response: verbose ? response : response.payload }
     } catch (err) {
       return { error: (err as Error).message, response }
     }

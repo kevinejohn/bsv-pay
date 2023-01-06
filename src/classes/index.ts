@@ -14,6 +14,7 @@ export type broadcastResult =
 
 export type statusResult =
   | {
+      valid: boolean
       response: mapiReponse<statusReponsePayload> | statusReponsePayload
     }
   | { error: string; response?: any }
