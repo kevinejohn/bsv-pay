@@ -1,6 +1,6 @@
 import MapiClient from "../mapi"
 import { mapiReponse, pushResponsePayload, statusReponsePayload } from "../mapi"
-import { ProviderPlugin, broadcastResult, PluginOptions, statusResult } from "."
+import { ProviderPlugin, minerResult, PluginOptions } from "."
 import { DEFAULT_RATE } from "../config"
 
 export default abstract class MApiPlugin extends ProviderPlugin {
@@ -24,13 +24,7 @@ export default abstract class MApiPlugin extends ProviderPlugin {
     this.refreshRates()
   }
 
-  async broadcast({
-    txhex,
-    verbose,
-  }: {
-    txhex: string
-    verbose: boolean
-  }): Promise<broadcastResult> {
+  async broadcast(txhex: string): Promise<minerResult> {
     let response: mapiReponse<pushResponsePayload>
     try {
       response = (await this.mapi.pushTx(
@@ -38,7 +32,7 @@ export default abstract class MApiPlugin extends ProviderPlugin {
         true
       )) as mapiReponse<pushResponsePayload>
     } catch (err) {
-      return { error: `mAPI error: ${(err as Error).message}` }
+      throw new Error(`mAPI error: ${(err as Error).message}`)
     }
 
     try {
@@ -51,23 +45,25 @@ export default abstract class MApiPlugin extends ProviderPlugin {
           `Result ${response.payload.returnResult}: ${response.payload.resultDescription}`
         )
       }
+
       const txid = response.payload.txid
       if (!txid || Buffer.from(txid, "hex").toString("hex") !== txid) {
         throw Error("Missing txid")
       }
-      return { txid, response: verbose ? response : response.payload }
+
+      const success = response.payload.txid === "success"
+
+      return { success: success, response: response.payload }
     } catch (err) {
-      return { error: (err as Error).message, response }
+      return {
+        success: false,
+        response: response,
+        error: (err as Error).message,
+      }
     }
   }
 
-  async status({
-    txid,
-    verbose,
-  }: {
-    txid: string
-    verbose: boolean
-  }): Promise<statusResult> {
+  async status(txid: string): Promise<minerResult> {
     let response: mapiReponse<statusReponsePayload>
     try {
       response = (await this.mapi.getTxStatus(
@@ -75,7 +71,7 @@ export default abstract class MApiPlugin extends ProviderPlugin {
         true
       )) as mapiReponse<statusReponsePayload>
     } catch (err) {
-      return { error: `mAPI error: ${(err as Error).message}` }
+      throw new Error(`mAPI error: ${(err as Error).message}`)
     }
 
     try {
@@ -84,11 +80,15 @@ export default abstract class MApiPlugin extends ProviderPlugin {
 
       if (!response.payload) throw Error("Missing payload")
 
-      const valid = response.payload.returnResult === "success"
+      const success = response.payload.returnResult === "success"
 
-      return { valid, response: verbose ? response : response.payload }
+      return { success: success, response: response.payload }
     } catch (err) {
-      return { error: (err as Error).message, response }
+      return {
+        success: false,
+        response: response,
+        error: (err as Error).message,
+      }
     }
   }
 

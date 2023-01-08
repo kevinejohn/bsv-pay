@@ -1,12 +1,7 @@
 import Plugins from "./plugins"
 import { DEFAULT_RATE } from "./config"
 
-import type {
-  ProviderPlugin,
-  PluginOptions,
-  broadcastResult,
-  statusResult,
-} from "./classes"
+import type { ProviderPlugin, PluginOptions, minerResult } from "./classes"
 
 type Options = {
   plugins?: typeof ProviderPlugin[]
@@ -14,12 +9,10 @@ type Options = {
   pluginOptions?: { [plugin: string]: false | PluginOptions }
 }
 
-type broadcastReport = {
-  [plugin: string]: broadcastResult
-}
-
-type statusReport = {
-  [plugin: string]: any
+type report = {
+  [plugin: string]:
+    | minerResult
+    | { success: false; response?: any; error: string }
 }
 
 class BsvPay {
@@ -51,74 +44,55 @@ class BsvPay {
     })
   }
 
-  async broadcast({
-    txhex,
-    verbose = false,
-    callback,
-  }: {
-    txhex: string
-    verbose?: boolean
-    callback?: (report: broadcastReport) => void
-  }): Promise<broadcastReport | broadcastResult> {
-    const report: broadcastReport = {}
+  async broadcast(txhex: string): Promise<report> {
+    const report: report = {}
 
     // Try all plugins in parallel, resolve as soon as one returns a success message
     return new Promise(async resolveReport => {
       await Promise.all(
         this.plugins.map(async plugin => {
           try {
-            const res = await plugin.broadcast({ txhex, verbose })
-            report[plugin.name] = res
+            report[plugin.name] = await plugin.broadcast(txhex)
           } catch (err) {
             this.DEBUG && console.error(`bsv-pay: broadcast error`, err)
             report[plugin.name] = {
+              success: false,
               error: (err as Error).message,
             }
           }
 
-          if ("txid" in report[plugin.name]) {
-            if (typeof callback === "function") callback(report)
-
-            resolveReport(report[plugin.name])
+          if (report[plugin.name].success === true) {
+            resolveReport(report)
           }
         })
       )
-      if (typeof callback === "function") callback(report)
 
       resolveReport(report)
     })
   }
 
-  async status({
-    txid,
-    verbose = false,
-    callback,
-  }: {
-    txid: string
-    verbose?: boolean
-    callback?: (report: statusReport) => void
-  }): Promise<statusReport | statusResult> {
+  async status(txid: string): Promise<report> {
     return await new Promise(async resolve => {
-      const report: statusReport = {}
+      const report: report = {}
 
       await Promise.all(
         this.plugins.map(async plugin => {
           try {
-            const status = await plugin.status({ txid, verbose })
+            const status = await plugin.status(txid)
             report[plugin.name] = status
           } catch (err) {
             this.DEBUG && console.error(`bsv-pay: status error`, err)
-            report[plugin.name] = (err as Error).message
+            report[plugin.name] = {
+              success: false,
+              error: (err as Error).message,
+            }
           }
 
-          if (report[plugin.name].valid === true) {
-            if (typeof callback === "function") callback(report)
-
-            resolve(report[plugin.name])
+          if (report[plugin.name].success === true) {
+            resolve(report)
           }
         })
       )
-      if (typeof callback === "function") callback(report)
 
       resolve(report)
     })
