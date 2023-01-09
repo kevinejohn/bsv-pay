@@ -18,14 +18,17 @@ Broadcast bitcoin transactions to miners
 const BsvPay = require("bsv-pay")
 
 const pay = new BsvPay({
+  DEBUG: true
+  plugins: []
   pluginOptions: {
     // whatsonchain: false // To disable specific service
     // taal: false,
     // gorillapool: false,
   },
 })
-const { txid } = await pay.broadcast({ tx, verbose: false })
-const { valid } = await pay.status({ txid, verbose: true })
+const { success, report } = await pay.broadcast(txHex)
+const { success, report } = await pay.status(txid)
+
 pay.feePerKb()
 ```
 
