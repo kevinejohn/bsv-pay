@@ -1,11 +1,12 @@
 import Plugins from "./plugins"
-import { DEFAULT_RATE } from "./config"
+import { DEFAULT_RATE, DEFAULT_TIMEOUT } from "./config"
 
 import type { ProviderPlugin, PluginOptions, minerResult } from "./classes"
 
 type Options = {
   plugins?: typeof ProviderPlugin[]
   DEBUG?: boolean
+  TIMEOUT?: number
   pluginOptions?: { [plugin: string]: false | PluginOptions }
 }
 
@@ -20,10 +21,17 @@ type report = {
 
 class BsvPay {
   DEBUG: boolean
+  TIMEOUT: number
   plugins: ProviderPlugin[] = []
 
-  constructor({ DEBUG = false, plugins = [], pluginOptions = {} }: Options) {
+  constructor({
+    DEBUG = false,
+    TIMEOUT = DEFAULT_TIMEOUT,
+    plugins = [],
+    pluginOptions = {},
+  }: Options) {
     this.DEBUG = DEBUG
+    this.TIMEOUT = TIMEOUT
 
     const usePlugins = [...plugins, ...Plugins]
 
@@ -65,23 +73,27 @@ class BsvPay {
     // Try all plugins in parallel, resolve as soon as one returns a success message
     return new Promise(async resolveReport => {
       await Promise.all(
-        this.plugins.map(async plugin => {
-          try {
-            results[plugin.name] = await resolveFunction(plugin)
-          } catch (err) {
-            this.DEBUG && console.error(`bsv-pay: broadcast error`, err)
-            results[plugin.name] = {
-              success: false,
-              error: (err as Error).message,
-            }
-          }
+        this.plugins.map(async (plugin): Promise<void> => {
+          return new Promise(async resolveResult => {
+            setTimeout(() => resolveResult(), this.TIMEOUT)
 
-          if (results[plugin.name].success === true) {
-            resolveReport({
-              results,
-              success: true,
-            })
-          }
+            try {
+              results[plugin.name] = await resolveFunction(plugin)
+            } catch (err) {
+              this.DEBUG && console.error(`bsv-pay: broadcast error`, err)
+              results[plugin.name] = {
+                success: false,
+                error: (err as Error).message,
+              }
+            }
+
+            if (results[plugin.name].success === true) {
+              resolveReport({
+                results,
+                success: true,
+              })
+            }
+          })
         })
       )
 
