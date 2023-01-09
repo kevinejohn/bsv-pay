@@ -11,32 +11,27 @@ export default class WhatsonchainPlugin extends ProviderPlugin {
   }
 
   async broadcast(txhex: string): Promise<minerResult> {
-    return new Promise(async resolve => {
-      const res = await fetch(
-        `https://api.whatsonchain.com/v1/bsv/main/tx/raw`,
-        {
-          method: "POST",
-          body: JSON.stringify({ txhex }),
-          headers: { "Content-Type": "application/json" },
-        }
-      )
-
-      const response = await res.json()
-
-      try {
-        const hexstr = /^[a-f0-9]{64}$/gi
-        if (!hexstr.test(response)) {
-          throw new Error(`ERROR: ${response}`)
-        }
-
-        resolve({ success: true, response })
-      } catch (err) {
-        return {
-          success: false,
-          response: response,
-          error: (err as Error).message,
-        }
-      }
+    const res = await fetch(`https://api.whatsonchain.com/v1/bsv/main/tx/raw`, {
+      method: "POST",
+      body: JSON.stringify({ txhex }),
+      headers: { "Content-Type": "application/json" },
     })
+
+    const response = await res.json()
+
+    try {
+      const hexstr = /^[a-f0-9]{64}$/gi
+      if (!hexstr.test(response)) {
+        throw new Error(`ERROR: ${response}`)
+      }
+
+      return { success: true, response }
+    } catch (err) {
+      return {
+        success: false,
+        response: response,
+        error: (err as Error).message,
+      }
+    }
   }
 }
