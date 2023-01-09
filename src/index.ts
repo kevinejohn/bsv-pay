@@ -48,6 +48,18 @@ class BsvPay {
   }
 
   async broadcast(txhex: string): Promise<report> {
+    const resolveFunction = (plugin: ProviderPlugin) => plugin.broadcast(txhex)
+    return await this.resolvePluginQueries(resolveFunction)
+  }
+
+  async status(txid: string): Promise<report> {
+    const resolveFunction = (plugin: ProviderPlugin) => plugin.status(txid)
+    return await this.resolvePluginQueries(resolveFunction)
+  }
+
+  async resolvePluginQueries(
+    resolveFunction: (plugin: ProviderPlugin) => Promise<minerResult>
+  ): Promise<report> {
     const results: results = {}
 
     // Try all plugins in parallel, resolve as soon as one returns a success message
@@ -55,7 +67,7 @@ class BsvPay {
       await Promise.all(
         this.plugins.map(async plugin => {
           try {
-            results[plugin.name] = await plugin.broadcast(txhex)
+            results[plugin.name] = await resolveFunction(plugin)
           } catch (err) {
             this.DEBUG && console.error(`bsv-pay: broadcast error`, err)
             results[plugin.name] = {
@@ -74,39 +86,6 @@ class BsvPay {
       )
 
       resolveReport({
-        results,
-        success: false,
-      })
-    })
-  }
-
-  async status(txid: string): Promise<report> {
-    return await new Promise(async resolve => {
-      const results: results = {}
-
-      await Promise.all(
-        this.plugins.map(async plugin => {
-          try {
-            const status = await plugin.status(txid)
-            results[plugin.name] = status
-          } catch (err) {
-            this.DEBUG && console.error(`bsv-pay: status error`, err)
-            results[plugin.name] = {
-              success: false,
-              error: (err as Error).message,
-            }
-          }
-
-          if (results[plugin.name].success === true) {
-            resolve({
-              results,
-              success: true,
-            })
-          }
-        })
-      )
-
-      resolve({
         results,
         success: false,
       })
