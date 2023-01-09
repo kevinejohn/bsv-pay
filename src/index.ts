@@ -29,7 +29,7 @@ class BsvPay {
     TIMEOUT = DEFAULT_TIMEOUT,
     plugins = [],
     pluginOptions = {},
-  }: Options) {
+  }: Options = {}) {
     this.DEBUG = DEBUG
     this.TIMEOUT = TIMEOUT
 
