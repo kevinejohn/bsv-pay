@@ -9,10 +9,13 @@ type Options = {
   pluginOptions?: { [plugin: string]: false | PluginOptions }
 }
 
+type results = {
+  [plugin: string]: minerResult
+}
+
 type report = {
-  [plugin: string]:
-    | minerResult
-    | { success: false; response?: any; error: string }
+  success: boolean
+  results: results
 }
 
 class BsvPay {
@@ -45,56 +48,68 @@ class BsvPay {
   }
 
   async broadcast(txhex: string): Promise<report> {
-    const report: report = {}
+    const results: results = {}
 
     // Try all plugins in parallel, resolve as soon as one returns a success message
     return new Promise(async resolveReport => {
       await Promise.all(
         this.plugins.map(async plugin => {
           try {
-            report[plugin.name] = await plugin.broadcast(txhex)
+            results[plugin.name] = await plugin.broadcast(txhex)
           } catch (err) {
             this.DEBUG && console.error(`bsv-pay: broadcast error`, err)
-            report[plugin.name] = {
+            results[plugin.name] = {
               success: false,
               error: (err as Error).message,
             }
           }
 
-          if (report[plugin.name].success === true) {
-            resolveReport(report)
+          if (results[plugin.name].success === true) {
+            resolveReport({
+              results,
+              success: true,
+            })
           }
         })
       )
 
-      resolveReport(report)
+      resolveReport({
+        results,
+        success: false,
+      })
     })
   }
 
   async status(txid: string): Promise<report> {
     return await new Promise(async resolve => {
-      const report: report = {}
+      const results: results = {}
 
       await Promise.all(
         this.plugins.map(async plugin => {
           try {
             const status = await plugin.status(txid)
-            report[plugin.name] = status
+            results[plugin.name] = status
           } catch (err) {
             this.DEBUG && console.error(`bsv-pay: status error`, err)
-            report[plugin.name] = {
+            results[plugin.name] = {
               success: false,
               error: (err as Error).message,
             }
           }
 
-          if (report[plugin.name].success === true) {
-            resolve(report)
+          if (results[plugin.name].success === true) {
+            resolve({
+              results,
+              success: true,
+            })
           }
         })
       )
 
-      resolve(report)
+      resolve({
+        results,
+        success: false,
+      })
     })
   }
 
