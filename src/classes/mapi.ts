@@ -3,10 +3,16 @@ import { mapiReponse, pushResponsePayload, statusReponsePayload } from "../mapi"
 import { ProviderPlugin, minerResult, PluginOptions } from "."
 import { DEFAULT_RATE } from "../config"
 
+const MIN_REFRESH = 300 * 1000 // 5 minutes
+
 export default abstract class MApiPlugin extends ProviderPlugin {
   abstract name: string
   mapi: MapiClient
-  dataRate?: number
+  dataRate?: {
+    satsPerByte: number
+    expiration: number
+    lastUpdate: number
+  }
   headers: any
   url: string
 
@@ -21,10 +27,11 @@ export default abstract class MApiPlugin extends ProviderPlugin {
     this.headers = headers || {}
 
     this.mapi = new MapiClient(this.url, this.headers)
-    this.refreshRates()
   }
 
   async broadcast(txhex: string): Promise<minerResult> {
+    if (this.hasExpiredDataRate()) await this.refreshDataRate()
+
     let response: mapiReponse<pushResponsePayload>
     try {
       response = (await this.mapi.pushTx(
@@ -64,6 +71,8 @@ export default abstract class MApiPlugin extends ProviderPlugin {
   }
 
   async status(txid: string): Promise<minerResult> {
+    if (this.hasExpiredDataRate()) await this.refreshDataRate()
+
     let response: mapiReponse<statusReponsePayload>
     try {
       response = (await this.mapi.getTxStatus(
@@ -92,47 +101,39 @@ export default abstract class MApiPlugin extends ProviderPlugin {
     }
   }
 
-  async refreshRates(): Promise<void> {
-    const MIN_REFRESH = 60 * 1000
-    try {
-      const rate = await this.mapi.getFeeRate()
+  hasExpiredDataRate(): boolean {
+    if (!this.dataRate) return true
 
-      if (rate.mine.data > 0) {
-        this.dataRate = rate.mine.data * 1000
+    const currentTime = new Date().getTime()
 
-        let nextUpdate = new Date(rate.expires).getTime() - new Date().getTime()
-        nextUpdate -= 30 * 1000 // 30 seconds buffer time
-        if (!(nextUpdate > 0) || nextUpdate < MIN_REFRESH) {
-          nextUpdate = MIN_REFRESH
-        }
+    if (this.dataRate.expiration - currentTime < 0) return true
 
-        if (this.DEBUG) {
-          console.log(
-            `bsv-pay: Updated ${this.name} rate: ${
-              this.dataRate
-            }. Next update in ${(nextUpdate / (60 * 1000)).toFixed(1)} minutes.`
-          )
-        }
+    if (currentTime - this.dataRate.lastUpdate > MIN_REFRESH) return true
 
-        setTimeout(() => this.refreshRates(), nextUpdate)
-      } else {
-        throw new Error(`Invalid fee rate`)
+    return false
+  }
+
+  async refreshDataRate(): Promise<void> {
+    const rate = await this.mapi.getFeeRate()
+
+    if (rate.mine.data > 0) {
+      this.dataRate = {
+        satsPerByte: rate.mine.data * 1000,
+        expiration: new Date(rate.expires).getTime(),
+        lastUpdate: new Date().getTime(),
       }
-    } catch (err) {
-      const TRY_AGAIN = 60 * 1000
-      this.DEBUG &&
-        console.log(
-          `bsv-pay: Could not get rates for ${this.name}. Retrying in ${
-            TRY_AGAIN / 1000
-          } seconds...`,
-          (err as Error).message
-        )
-      await new Promise(resolve => setTimeout(resolve, TRY_AGAIN))
-      this.refreshRates()
+    } else {
+      throw new Error(`Invalid fee rate`)
+    }
+
+    if (this.DEBUG) {
+      console.log(
+        `bsv-pay: Updated ${this.name} rate: ${this.dataRate.satsPerByte}.`
+      )
     }
   }
 
   getRate(): number {
-    return Math.min(DEFAULT_RATE, this.dataRate || DEFAULT_RATE)
+    return Math.min(DEFAULT_RATE, this.dataRate?.satsPerByte || DEFAULT_RATE)
   }
 }
