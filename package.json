@@ -6,13 +6,14 @@
   "types": "./lib/index.d.ts",
   "files": [
     "lib",
-    "@types"
+    "src"
   ],
   "scripts": {
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.(?:js)|(?:ts)\"",
     "build": "rm -rf ./lib/ && tsc",
-    "test": "ts-node ./tests/index.ts"
+    "test": "ts-node ./tests/index.ts",
+    "prepare": "npm run build"
   },
   "author": "Kevin Johnson (KevinEJohn)",
   "license": "MIT",
