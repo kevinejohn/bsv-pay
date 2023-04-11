@@ -5,6 +5,6 @@ export default class BitailsPlugin extends MApiPlugin {
   name = "bitails"
 
   constructor(params: PluginOptions) {
-    super({ ...params, url: "https://mapi.bitails.net" })
+    super({ ...params, url: "https://mapi.bitails.io" })
   }
 }
